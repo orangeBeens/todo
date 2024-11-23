@@ -23,7 +23,6 @@ jobs:
         run: |
           flutter pub get
           flutter build web --release
-          echo "Flutter build completed"
 
       - name: Create Docker configurations
         run: |
@@ -46,6 +45,14 @@ jobs:
           }
           EOF
 
+      - name: Remove build from .gitignore
+        run: |
+          if [ -f .gitignore ]; then
+            sed -i '/^build\//d' .gitignore
+            echo "Modified .gitignore:"
+            cat .gitignore
+          fi
+
       - id: 'auth'
         uses: 'google-github-actions/auth@v1'
         with:
@@ -54,16 +61,10 @@ jobs:
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v1'
 
-      - name: Configure gcloud CLI
-        run: |
-          gcloud config set project flutter-todo-442601
-
       - name: 'Deploy to Cloud Run'
         run: |
-          # Submit the build with explicit project ID
           gcloud builds submit --project=flutter-todo-442601 --tag gcr.io/flutter-todo-442601/flutter-web-app
-
-          # Deploy to Cloud Run with explicit project ID
+          
           gcloud run deploy flutter-web-app \
             --project=flutter-todo-442601 \
             --image gcr.io/flutter-todo-442601/flutter-web-app \
@@ -71,10 +72,3 @@ jobs:
             --platform managed \
             --allow-unauthenticated \
             --port 8080
-
-      - name: Get Service URL
-        run: |
-          gcloud run services describe flutter-web-app \
-            --project=flutter-todo-442601 \
-            --region asia-northeast1 \
-            --format='get(status.url)'
