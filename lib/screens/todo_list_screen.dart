@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'dart:math' as math;
 import '../models/todo.dart';
 import '../widgets/todo_section.dart';
@@ -119,44 +120,49 @@ class _TodoListScreenState extends State<TodoListScreen> with SingleTickerProvid
     }
   }
 
-  void _showThemeSelector() {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: const Text('ダークグレー'),
-                leading: const Icon(Icons.circle, color: Colors.grey),
-                onTap: () {
-                  setState(() => _currentTheme = AppThemeType.darkGrey);
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: const Text('ネイビー'),
-                leading: const Icon(Icons.circle, color: Color(0xFF1A237E)),
-                onTap: () {
-                  setState(() => _currentTheme = AppThemeType.navy);
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: const Text('ライト'),
-                leading: const Icon(Icons.circle, color: Colors.white),
-                onTap: () {
-                  setState(() => _currentTheme = AppThemeType.light);
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+void _showThemeSelector() {
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext context) {
+      return SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: const Text('ダークグレー'),
+              leading: const Icon(Icons.circle, color: Colors.grey),
+              onTap: () {
+                Provider.of<AppThemeNotifier>(context, listen: false)
+                    .setTheme(AppThemeType.darkGrey);
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: const Text('ネイビー'),
+              leading: const Icon(Icons.circle, color: Color(0xFF1A237E)),
+              onTap: () {
+                Provider.of<AppThemeNotifier>(context, listen: false)
+                    .setTheme(AppThemeType.navy);
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: const Text('ライト'),
+              leading: const Icon(Icons.circle, color: Colors.white),
+              onTap: () {
+                Provider.of<AppThemeNotifier>(context, listen: false)
+                    .setTheme(AppThemeType.light);
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+
 
   void _showCategoryMenu(int index) {
     final category = _categories[index];

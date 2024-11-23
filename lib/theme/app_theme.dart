@@ -1,63 +1,75 @@
 import 'package:flutter/material.dart';
 
-enum AppThemeType {
-  darkGrey,
-  navy,
-  light,
-}
+enum AppThemeType { darkGrey, navy, light }
 
-class AppTheme {
-  static ThemeData getDarkGreyTheme() {
-    return ThemeData(
-      useMaterial3: true,
-      brightness: Brightness.dark,
-      scaffoldBackgroundColor: Colors.grey[900],
-      colorScheme: ColorScheme.dark(
-        background: Colors.grey[900]!,
-        surface: Colors.grey[800]!,
-        primary: Colors.blue[400]!,
-      ),
-      appBarTheme: AppBarTheme(
-        backgroundColor: Colors.grey[850],
-        foregroundColor: Colors.white,
-      ),
-      textTheme: const TextTheme().apply(
-        bodyColor: Colors.white,
-        displayColor: Colors.white,
-      ),
-    );
+class AppThemeNotifier extends ChangeNotifier {
+  AppThemeType _currentTheme = AppThemeType.light;
+  
+  AppThemeType get currentTheme => _currentTheme;
+  
+  ThemeData get themeData {
+    switch (_currentTheme) {
+      case AppThemeType.darkGrey:
+        return ThemeData(
+          brightness: Brightness.dark,
+          primaryColor: Colors.grey[800],
+          scaffoldBackgroundColor: Colors.grey[900],
+          appBarTheme: AppBarTheme(
+            backgroundColor: Colors.grey[800],
+            foregroundColor: Colors.white,
+          ),
+          tabBarTheme: const TabBarTheme(
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white70,
+          ),
+          floatingActionButtonTheme: FloatingActionButtonThemeData(
+            backgroundColor: Colors.grey[700],
+            foregroundColor: Colors.white,
+          ),
+        );
+        
+      case AppThemeType.navy:
+        return ThemeData(
+          brightness: Brightness.dark,
+          primaryColor: const Color(0xFF1A237E),
+          scaffoldBackgroundColor: const Color(0xFF0D1B3E),
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Color(0xFF1A237E),
+            foregroundColor: Colors.white,
+          ),
+          tabBarTheme: const TabBarTheme(
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white70,
+          ),
+          floatingActionButtonTheme: const FloatingActionButtonThemeData(
+            backgroundColor: Color(0xFF1A237E),
+            foregroundColor: Colors.white,
+          ),
+        );
+        
+      case AppThemeType.light:
+        return ThemeData(
+          brightness: Brightness.light,
+          primaryColor: Colors.white,
+          scaffoldBackgroundColor: Colors.grey[50],
+          appBarTheme: AppBarTheme(
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.grey[900],
+          ),
+          tabBarTheme: TabBarTheme(
+            labelColor: Colors.grey[900],
+            unselectedLabelColor: Colors.grey[700],
+          ),
+          floatingActionButtonTheme: FloatingActionButtonThemeData(
+            backgroundColor: Colors.blue[600],
+            foregroundColor: Colors.white,
+          ),
+        );
+    }
   }
-
-  static ThemeData getNavyTheme() {
-    return ThemeData(
-      useMaterial3: true,
-      brightness: Brightness.dark,
-      scaffoldBackgroundColor: const Color(0xFF1A237E),
-      colorScheme: const ColorScheme.dark(
-        background: Color(0xFF1A237E),
-        surface: Color(0xFF283593),
-        primary: Color(0xFF82B1FF),
-      ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Color(0xFF283593),
-        foregroundColor: Colors.white,
-      ),
-      textTheme: const TextTheme().apply(
-        bodyColor: Colors.white,
-        displayColor: Colors.white,
-      ),
-    );
-  }
-
-  static ThemeData getLightTheme() {
-    return ThemeData(
-      useMaterial3: true,
-      brightness: Brightness.light,
-      colorScheme: ColorScheme.light(
-        background: Colors.grey[50]!,
-        surface: Colors.white,
-        primary: Colors.blue,
-      ),
-    );
+  
+  void setTheme(AppThemeType theme) {
+    _currentTheme = theme;
+    notifyListeners();
   }
 }
