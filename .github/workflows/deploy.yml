@@ -19,47 +19,32 @@ jobs:
           flutter-version: '3.24.5'
           channel: 'stable'
 
-      # Flutterビルドのステップを分割して、各段階を確認
-      - name: Flutter Clean
-        run: flutter clean
-
-      - name: Get packages
-        run: flutter pub get
-
-      - name: Verify directories before build
+      - name: Flutter Build
         run: |
-          pwd
-          ls -la
-
-      - name: Build Flutter web
-        run: |
+          flutter pub get
           flutter build web --release
           echo "Flutter build completed"
-          ls -la build/
-          ls -la build/web/
 
       - name: Create Docker configurations
         run: |
-          # Dockerfile作成
-          cat > Dockerfile << 'EOL'
+          cat > Dockerfile << EOF
           FROM nginx:alpine
           COPY build/web /usr/share/nginx/html/
           COPY nginx.conf /etc/nginx/conf.d/default.conf
           EXPOSE 8080
-          EOL
+          EOF
           
-          # nginx.conf作成
-          cat > nginx.conf << 'EOL'
+          cat > nginx.conf << EOF
           server {
               listen 8080;
               server_name localhost;
               root /usr/share/nginx/html;
               index index.html;
               location / {
-                  try_files $uri $uri/ /index.html;
+                  try_files \$uri \$uri/ /index.html;
               }
           }
-          EOL
+          EOF
 
       - id: 'auth'
         uses: 'google-github-actions/auth@v1'
@@ -69,8 +54,27 @@ jobs:
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v1'
 
-      - name: 'Deploy to Cloud Run'
+      - name: Configure gcloud CLI
         run: |
           gcloud config set project flutter-todo-442601
-          # ビルドコンテキストの内容を確認
-          echo "Current direc
+
+      - name: 'Deploy to Cloud Run'
+        run: |
+          # Submit the build with explicit project ID
+          gcloud builds submit --project=flutter-todo-442601 --tag gcr.io/flutter-todo-442601/flutter-web-app
+
+          # Deploy to Cloud Run with explicit project ID
+          gcloud run deploy flutter-web-app \
+            --project=flutter-todo-442601 \
+            --image gcr.io/flutter-todo-442601/flutter-web-app \
+            --region asia-northeast1 \
+            --platform managed \
+            --allow-unauthenticated \
+            --port 8080
+
+      - name: Get Service URL
+        run: |
+          gcloud run services describe flutter-web-app \
+            --project=flutter-todo-442601 \
+            --region asia-northeast1 \
+            --format='get(status.url)'
