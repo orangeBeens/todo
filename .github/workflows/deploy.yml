@@ -23,12 +23,16 @@ jobs:
         run: |
           flutter pub get
           flutter build web --release
+          # ビルド後のファイル確認
+          ls -la build/web
 
+      # Dockerfileをビルドディレクトリに移動
       - name: Create Docker configurations
         run: |
+          cd build/web
           cat > Dockerfile << EOF
           FROM nginx:alpine
-          COPY build/web /usr/share/nginx/html/
+          COPY . /usr/share/nginx/html/
           COPY nginx.conf /etc/nginx/conf.d/default.conf
           EXPOSE 8080
           EOF
@@ -45,14 +49,6 @@ jobs:
           }
           EOF
 
-      - name: Remove build from .gitignore
-        run: |
-          if [ -f .gitignore ]; then
-            sed -i '/^build\//d' .gitignore
-            echo "Modified .gitignore:"
-            cat .gitignore
-          fi
-
       - id: 'auth'
         uses: 'google-github-actions/auth@v1'
         with:
@@ -63,6 +59,7 @@ jobs:
 
       - name: 'Deploy to Cloud Run'
         run: |
+          cd build/web
           gcloud builds submit --project=flutter-todo-442601 --tag gcr.io/flutter-todo-442601/flutter-web-app
           
           gcloud run deploy flutter-web-app \
