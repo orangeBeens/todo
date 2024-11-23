@@ -7,7 +7,6 @@ import '../widgets/category_dialog.dart';
 import '../widgets/celebration_overlay.dart';
 import '../theme/app_theme.dart';
 
-
 class TodoListScreen extends StatefulWidget {
   const TodoListScreen({super.key});
 
