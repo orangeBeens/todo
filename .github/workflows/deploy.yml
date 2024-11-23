@@ -24,7 +24,6 @@ jobs:
           flutter pub get
           flutter build web
 
-      # Dockerfileの生成を修正
       - name: Create Docker configurations
         run: |
           # Dockerfile作成
@@ -46,7 +45,6 @@ jobs:
               location / {
                   try_files $uri $uri/ /index.html;
               }
-              # Flutter用の追加設定
               location /assets/ {
                   expires 1y;
                   add_header Cache-Control "public, no-transform";
@@ -58,23 +56,21 @@ jobs:
         uses: 'google-github-actions/auth@v1'
         with:
           credentials_json: '${{ secrets.GCP_SA_KEY }}'
-          project_id: 'flutter-todo-442601'  # プロジェクトIDを追加
+          project_id: 'flutter-todo-442601'
 
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v1'
 
-      # Cloud Runへのデプロイを修正
       - name: 'Deploy to Cloud Run'
-        id: 'deploy'  # IDを追加
-        uses: 'google-github-actions/deploy-cloudrun@v1'
-        with:
-          service: 'flutter-web-app'
-          region: 'asia-northeast1'
-          source: '.'
-          env_vars: |
-            NGINX_PORT=8080
-          port: 8080
-          allow-unauthenticated: true
+        run: |-
+          gcloud run deploy flutter-web-app \
+            --source . \
+            --region asia-northeast1 \
+            --platform managed \
+            --allow-unauthenticated \
+            --port 8080 \
+            --set-env-vars NGINX_PORT=8080
 
-      - name: 'Show Output'
-        run: 'echo ${{ steps.deploy.outputs.url }}'
+      - name: Get Service URL
+        run: |-
+          echo "Service URL: $(gcloud run services describe flutter-web-app --region asia-northeast1 --format 'value(status.url)')"
